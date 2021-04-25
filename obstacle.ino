@@ -1,7 +1,12 @@
-//servo - 12
-//ultrasonic - trig: 10, echo 11
-//FB motor - pin1:2,3; pin2:4,5
-//LR motor - pin1:6,7; pin3:8,9
+//FB motor - A2, A3
+//LR motor - A0, A1
+//servo (0, 90, 180) = (right, front, left)
+
+#define ENA 3
+#define ENB 5
+#define trig 10
+#define echo 11
+#define ser 12
 
 #include<Servo.h>
 Servo servo;
@@ -9,14 +14,23 @@ int angle = 90;
 long duration;
 int distance;
 int x, y, z;
+int d;
+int dir;
 
 void setup() {
-  for(int i=2; i<=10; i++){
-    pinMode(i, OUTPUT);
-  }
-  pinMode(11, INPUT);
-  servo.attach(12);
+  pinMode(2, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(A0, OUTPUT);
+  pinMode(A1, OUTPUT);
+  pinMode(A2, OUTPUT);
+  pinMode(A3, OUTPUT);
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+  servo.attach(ser);
   servo.write(angle);
+  digitalWrite(ENB, LOW);
+  digitalWrite(2, HIGH);
 }
 
 int ping() {
@@ -25,32 +39,38 @@ int ping() {
   return distance;
 }
 
-void forward() {digitalWrite(2, HIGH); digitalWrite(3, HIGH); digitalWrite(4, LOW); digitalWrite(5, LOW);}
-
-void backward() {digitalWrite(2, HIGH); digitalWrite(3, HIGH); digitalWrite(4, LOW); digitalWrite(5, LOW);}
+void backward() {digitalWrite(ENA, HIGH); digitalWrite(A2, HIGH); digitalWrite(A3, LOW);}
+void forward() {digitalWrite(ENA, HIGH); digitalWrite(A2, LOW); digitalWrite(A3, HIGH);}
+void left() {digitalWrite(ENB, HIGH); digitalWrite(A0, HIGH); digitalWrite(A1, LOW);}
+void right() {digitalWrite(ENB, HIGH); digitalWrite(A0, LOW); digitalWrite(A1, HIGH);}
+void br() {digitalWrite(ENA, LOW); digitalWrite(A2, LOW); digitalWrite(A3, LOW);}
 
 int sweep() {
   servo.write(0); x=ping();
+  delay(1500);
   servo.write(90); y=ping();
+  delay(1500);
   servo.write(180); z=ping();
-  if (x<y and x<z){return 1;}
-  if (y<x and y<z){return 2;}
-  return 3;
+  delay(1500);
+  servo.write(90);
+  if (x<z){return 1;}else if (z<x){return 2;}
 }
 
 void loop() {
+  delay(500);
+  d = ping();
+  if(d>20) {
+    forward();
+    delay(2000);
+  } else if(d<20) {
+    br();
+    dir = sweep();
+    if (dir==1) {
+      left();
+      forward();
+    }else if(dir == 2) {
+      right();
+      forward();
+    }
+  }
 }
-
-
- // scan from 0 to 180 degrees
-  //for(angle = 0; angle < 180; angle++)  
-  //{                                  
-    //servo.write(angle);               
-    //delay(15);                   
-  //} 
-  // now scan back from 180 to 0 degrees
-  //for(angle = 180; angle > 0; angle--)    
-  //{                                
-    //servo.write(angle);           
-    //delay(15);       
-  //}
