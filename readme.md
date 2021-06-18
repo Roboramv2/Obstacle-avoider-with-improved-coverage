@@ -1,6 +1,10 @@
 # Obstacle Avoider with improved coverage
 ***
 
+<img src="./images/initial.JPG" width="100"/>
+<img src="./images/side.JPG" width="170"/>
+<img src="./images/top.JPG" width="183"/>
+
 ### Components used
 
 1. Arduino Uno
